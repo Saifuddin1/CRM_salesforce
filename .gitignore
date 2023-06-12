@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+link_env
+project.zip
+*env
+.vscode/
+s.py
