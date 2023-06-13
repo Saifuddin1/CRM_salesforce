@@ -4,4 +4,4 @@ link_env
 project.zip
 *env
 .vscode/
-s.py
+local.py
