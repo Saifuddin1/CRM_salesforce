@@ -8,6 +8,7 @@ from base import BaseBot
 class ConsultingScrapeperBot(BaseBot):
     base_url: str = "https://appexchange.salesforce.com/consulting"
     file_name = 'output.xlsx'
+    clicked = 0
     run_headless: bool = True
     driver: Any
 
@@ -159,7 +160,20 @@ class ConsultingScrapeperBot(BaseBot):
             df = pd.DataFrame(data=data, index=[1])
             df.to_excel(self.file_name, index=False)
 
+    def load_page_correctly(self):
+        while True:
+            try:
+                self.clicked += 1
+                show_more_button_css = "button[id = 'appx-load-more-button-id']"
+                self.sleep_until_presense_of_element(show_more_button_css)
+                show_more_button = self.driver.find_element(
+                    By.CSS_SELECTOR, show_more_button_css)
+                show_more_button.click()
+            except Exception as ex:
+                break
+
     def start_process(self) -> None:
+        self.load_page_correctly()
         all_companies_div_css = "ul[class='appx-tiles-grid-ul'] li a"
         self.sleep_until_presense_of_element(all_companies_div_css)
         all_companies_div = self.driver.find_elements(
@@ -167,7 +181,6 @@ class ConsultingScrapeperBot(BaseBot):
 
         for company_div in all_companies_div:
             self.driver.execute_script("arguments[0].click();", company_div)
-
             # extract all data on overview tab
             company_name = self.get_company_name()
             communication_channel = self.get_communication_channel()
@@ -177,53 +190,53 @@ class ConsultingScrapeperBot(BaseBot):
             phone = communication_channel['phone']
             cities_they_offer_services = self.get_cities()
 
-            # we still need to figure it out
-            # market_capitalization = self.get_market_capitalization()
-            # size_of_work = self.get_size_of_work()  # we still need to figure it out
+        # we still need to figure it out
+        # market_capitalization = self.get_market_capitalization()
+        # size_of_work = self.get_size_of_work()  # we still need to figure it out
 
-            # # extract all data on experties tab
-            # experties_css = "#tab-default-3__item"
-            # self.sleep_until_presense_of_element(experties_css)
-            # experties = self.driver.find_element(
-            #     By.CSS_SELECTOR, experties_css)
-            # self.driver.execute_script("arguments[0].click();", experties)
-            # print("yes........... after experties.........")
-            # time.sleep(3)
-            # expertise = self.get_expertise()
-            # awards_won = self.get_awards_won()
+        # # extract all data on experties tab
+        # experties_css = "#tab-default-3__item"
+        # self.sleep_until_presense_of_element(experties_css)
+        # experties = self.driver.find_element(
+        #     By.CSS_SELECTOR, experties_css)
+        # self.driver.execute_script("arguments[0].click();", experties)
+        # print("yes........... after experties.........")
+        # time.sleep(3)
+        # expertise = self.get_expertise()
+        # awards_won = self.get_awards_won()
 
-            # # extract all data on reviews tab
-            # reviews_css = "a[id='tab-default-2__item']"
-            # self.sleep_until_presense_of_element(reviews_css)
-            # reviews = self.driver.find_element(
-            #     By.CSS_SELECTOR, reviews_css)
+        # # extract all data on reviews tab
+        # reviews_css = "a[id='tab-default-2__item']"
+        # self.sleep_until_presense_of_element(reviews_css)
+        # reviews = self.driver.find_element(
+        #     By.CSS_SELECTOR, reviews_css)
 
-            # self.driver.execute_script("arguments[0].click();", reviews)
-            # print("YES......ON......REVIEW.....PAGE")
-            # time.sleep(10)
-            # reputation_score = self.get_reputation_score()
-            # time.sleep(2)
+        # self.driver.execute_script("arguments[0].click();", reviews)
+        # print("YES......ON......REVIEW.....PAGE")
+        # time.sleep(10)
+        # reputation_score = self.get_reputation_score()
+        # time.sleep(2)
 
-            # data = {
-            #     "COMPANY_NAME": company_name,
-            #     "OFFICE_LOCATION": office_location,
-            #     "WEBSITE": webiste,
-            #     "EMAIL": email,
-            #     "PHONE": phone,
-            #     "CITIES_THEY_OFFER_SERVICES": " , ".join(cities_they_offer_services),
-            #     "MARKET_CAPITALIZATION": market_capitalization,
-            #     "SIZE_OF_WORK": size_of_work,
-            #     "EXPERTISE": " , ".join(expertise),
-            #     "AWARDS_WON": " , ".join(awards_won),
-            #     "REPUTATION_SCRORE": reputation_score
-            # }
-            # self.save_data_into_excel(data)
-            break
+        # data = {
+        #     "COMPANY_NAME": company_name,
+        #     "OFFICE_LOCATION": office_location,
+        #     "WEBSITE": webiste,
+        #     "EMAIL": email,
+        #     "PHONE": phone,
+        #     "CITIES_THEY_OFFER_SERVICES": " , ".join(cities_they_offer_services),
+        #     "MARKET_CAPITALIZATION": market_capitalization,
+        #     "SIZE_OF_WORK": size_of_work,
+        #     "EXPERTISE": " , ".join(expertise),
+        #     "AWARDS_WON": " , ".join(awards_won),
+        #     "REPUTATION_SCRORE": reputation_score
+        # }
+        # self.save_data_into_excel(data)
+        # break
 
     def main_function(self) -> None:
         try:
             self.open_base_page()
-            self.start_process1()
+            self.start_process()
         except Exception as ex:
             print("EXCEPTION IS :", ex)
             return
