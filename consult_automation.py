@@ -52,7 +52,7 @@ class ConsultingScrapeperBot(BaseBot):
         return communication_channel
 
     def get_company_name(self) -> str:
-        company_name = ""
+        company_name = "Na"
         company_name_css = "#consulting-header-bar-title-id"
         self.sleep_until_presense_of_element(company_name_css)
         try:
@@ -60,7 +60,7 @@ class ConsultingScrapeperBot(BaseBot):
                 By.CSS_SELECTOR, company_name_css)
             company_name = company_name.text
         except Exception as ex:
-            company_name = "Na"
+            ...
         return company_name.upper()
 
     def get_cities(self) -> list:
@@ -71,7 +71,6 @@ class ConsultingScrapeperBot(BaseBot):
             self.sleep_until_create_post_button_visible(all_cities_css)
             all_cities = self.driver.find_elements(
                 By.CSS_SELECTOR, all_cities_css)
-            print("lenght of all cities withot link is :", len(all_cities))
             for city in all_cities:
                 cities_list.append(city.text)
         except Exception as ex:
@@ -93,10 +92,18 @@ class ConsultingScrapeperBot(BaseBot):
         return cities_list
 
     def get_reputation_score(self):
-        reputation_score_css = ".appx-average-rating-numeral"  # it is on Reviews tab
-        reputation_score = self.driver.find_element(
-            By.CSS_SELECTOR, reputation_score_css)
-        return reputation_score.text
+        # it is on Reviews tab
+        reputation_score = "Na"
+        reputation_score_css = "div[class='appx-average-rating-numeral']"
+        self.sleep_until_presense_of_element(reputation_score_css)
+        print("my name is sifuddin...................")
+        try:
+            reputation_score = self.driver.find_element(
+                By.CSS_SELECTOR, reputation_score_css)
+            reputation_score = reputation_score.text
+        except Exception as ex:
+            reputation_score = "Some Error"
+        return reputation_score
 
     def get_market_capitalization(self) -> str:
         a = ""
@@ -135,18 +142,17 @@ class ConsultingScrapeperBot(BaseBot):
         try:
             dataframe1 = pd.read_excel(self.file_name)
             dataframe1.loc[len(dataframe1.index)] = [
-                data['company_name'],
-                data['office_location'],
-                data['webiste'],
-                data['email'],
-                data['phone'],
-                data['cities_they_offer_services'],
-                data['market_capitalization'],
-                data['size_of_work'],
-                data['expertise'],
-                data['awards_won'],
-                data['reputation_score'],
-
+                data['COMPANY_NAME'],
+                data['OFFICE_LOCATION'],
+                data['WEBSITE'],
+                data['EMAIL'],
+                data['PHONE'],
+                data['CITIES_THEY_OFFER_SERVICES'],
+                data['MARKET_CAPITALIZATION'],
+                data['SIZE_OF_WORK'],
+                data['EXPERTISE'],
+                data['AWARDS_WON'],
+                data['REPUTATION_SCRORE'],
             ]
             dataframe1.to_excel(self.file_name, index=False)
         except IOError:
@@ -170,51 +176,56 @@ class ConsultingScrapeperBot(BaseBot):
             email = communication_channel['email']
             phone = communication_channel['phone']
             cities_they_offer_services = self.get_cities()
-            market_capitalization = self.get_market_capitalization()
-            size_of_work = self.get_size_of_work()
 
-            # extract all data on experties tab
-            experties_css = "#tab-default-3__item"
-            self.sleep_until_presense_of_element(experties_css)
-            experties = self.driver.find_element(
-                By.CSS_SELECTOR, experties_css)
-            self.driver.execute_script("arguments[0].click();", experties)
-            print("yes........... after experties.........")
-            expertise = self.get_expertise()
-            awards_won = self.get_awards_won()
+            # we still need to figure it out
+            # market_capitalization = self.get_market_capitalization()
+            # size_of_work = self.get_size_of_work()  # we still need to figure it out
 
-            # extract all data on reviews tab
-            reviews_css = "#tab-default-2__item"
-            self.sleep_until_presense_of_element(reviews_css)
-            reviews = self.driver.find_element(
-                By.CSS_SELECTOR, reviews_css)
-            reviews.click()
-            reputation_score = self.get_reputation_score()
-            time.sleep(2)
-            data = {}
-            data = {
-                "company_name": company_name,
-                "office_location": office_location,
-                "webiste": webiste,
-                "email": email,
-                "phone": phone,
-                "cities_they_offer_services": " , ".join(cities_they_offer_services),
-                "market_capitalization": market_capitalization,
-                "size_of_work": size_of_work,
-                "expertise": " , ".join(expertise),
-                "awards_won": " , ".join(awards_won),
-                "reputation_score": reputation_score
-            }
-            self.save_data_into_excel(data)
+            # # extract all data on experties tab
+            # experties_css = "#tab-default-3__item"
+            # self.sleep_until_presense_of_element(experties_css)
+            # experties = self.driver.find_element(
+            #     By.CSS_SELECTOR, experties_css)
+            # self.driver.execute_script("arguments[0].click();", experties)
+            # print("yes........... after experties.........")
+            # time.sleep(3)
+            # expertise = self.get_expertise()
+            # awards_won = self.get_awards_won()
+
+            # # extract all data on reviews tab
+            # reviews_css = "a[id='tab-default-2__item']"
+            # self.sleep_until_presense_of_element(reviews_css)
+            # reviews = self.driver.find_element(
+            #     By.CSS_SELECTOR, reviews_css)
+
+            # self.driver.execute_script("arguments[0].click();", reviews)
+            # print("YES......ON......REVIEW.....PAGE")
+            # time.sleep(10)
+            # reputation_score = self.get_reputation_score()
+            # time.sleep(2)
+
+            # data = {
+            #     "COMPANY_NAME": company_name,
+            #     "OFFICE_LOCATION": office_location,
+            #     "WEBSITE": webiste,
+            #     "EMAIL": email,
+            #     "PHONE": phone,
+            #     "CITIES_THEY_OFFER_SERVICES": " , ".join(cities_they_offer_services),
+            #     "MARKET_CAPITALIZATION": market_capitalization,
+            #     "SIZE_OF_WORK": size_of_work,
+            #     "EXPERTISE": " , ".join(expertise),
+            #     "AWARDS_WON": " , ".join(awards_won),
+            #     "REPUTATION_SCRORE": reputation_score
+            # }
+            # self.save_data_into_excel(data)
             break
 
     def main_function(self) -> None:
-        print("starting main function...............")
         try:
             self.open_base_page()
-            self.start_process()
+            self.start_process1()
         except Exception as ex:
-            print("exception is :", ex)
+            print("EXCEPTION IS :", ex)
             return
 
 
