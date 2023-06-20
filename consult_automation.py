@@ -66,7 +66,6 @@ class ConsultingScrapeperBot(BaseBot):
 
     def get_cities(self) -> list:
         cities_list = []
-
         try:
             all_cities_css = "div[class*='appx-detail-subsection-values'] div span[class='appx-detail-subsection-values']"
             self.sleep_until_create_post_button_visible(all_cities_css)
@@ -76,38 +75,36 @@ class ConsultingScrapeperBot(BaseBot):
                 cities_list.append(city.text)
         except Exception as ex:
             ...
+        try:
+            all_cities_link_css = ".appx-detail-subsection-values.appx-tooltip-trigger"
+            self.sleep_until_presense_of_element(all_cities_link_css)
+            all_cities_link = self.driver.find_elements(
+                By.CSS_SELECTOR, all_cities_link_css)
 
-        # try:
-        #     all_cities_link_css = "div[class*='appx-detail-subsection-values'] div a span"
-        #     self.sleep_until_presense_of_element(all_cities_link_css)
-        #     all_cities_link = self.driver.find_elements(
-        #         By.CSS_SELECTOR, all_cities_link_css)
-        #     print("print in try block.............")
-        #     print("len of", len(all_cities_link))
-        #     for all_cities in all_cities_link:
-        #         cities_list.append(all_cities.text)
-        # except Exception as ex:
-        #     print("exception is :", ex)
-        #     print("print in except block...............")
-        #     ...
+            for all_cities in all_cities_link:
+                span = all_cities.find_element(By.TAG_NAME, 'span')
+                text = " ".join(span.get_attribute(
+                    'innerHTML').split()).split(",")
+                cities_list.extend(text)
+        except Exception as ex:
+            ...
         return cities_list
 
     def get_reputation_score(self):
-        # it is on Reviews tab
         reputation_score = "Na"
-        reputation_score_css = "div[class='appx-average-rating-numeral']"
-        self.sleep_until_presense_of_element(reputation_score_css)
-        print("my name is sifuddin...................")
         try:
-            reputation_score = self.driver.find_element(
-                By.CSS_SELECTOR, reputation_score_css)
-            reputation_score = reputation_score.text
+            first_css = '#reviewContainer'
+            self.sleep_until_presense_of_element(first_css)
+            rating = self.driver.find_element(By.CSS_SELECTOR, first_css)
+            second_css = '.appx-average-rating-numeral'
+            self.sleep_until_presense_of_element(second_css)
+            reputation_score = rating.find_element(
+                By.CSS_SELECTOR, second_css).text
         except Exception as ex:
-            reputation_score = "Some Error"
+            ...
         return reputation_score
 
     def get_market_capitalization(self) -> str:
-        a = ""
         return "Na"
 
     def get_size_of_work(self) -> str:
@@ -116,7 +113,7 @@ class ConsultingScrapeperBot(BaseBot):
     def get_expertise(self) -> list:
         expertise_list = []
         try:
-            all_expertise_css = "ul[id='appx_accordion_products'] li[class*='slds-a']"
+            all_expertise_css = "#appx_accordion_products li[class*='slds-a']"
             self.sleep_until_presense_of_element(all_expertise_css)
             all_expertise = self.driver.find_elements(
                 By.CSS_SELECTOR, all_expertise_css)
@@ -129,7 +126,7 @@ class ConsultingScrapeperBot(BaseBot):
     def get_awards_won(self):
         awards_won_list = []
         try:
-            awards_won_css = "ul[id='appx_accordion_certifications'] li[class*='slds-a'] span[class='appx-accordion-btn__text-title']"
+            awards_won_css = "#appx_accordion_certifications li[class*='slds-a'] span[class='appx-accordion-btn__text-title']"
             self.sleep_until_presense_of_element(awards_won_css)
             awards_won = self.driver.find_elements(
                 By.CSS_SELECTOR, awards_won_css)
@@ -143,17 +140,17 @@ class ConsultingScrapeperBot(BaseBot):
         try:
             dataframe1 = pd.read_excel(self.file_name)
             dataframe1.loc[len(dataframe1.index)] = [
-                data['COMPANY_NAME'],
-                data['OFFICE_LOCATION'],
-                data['WEBSITE'],
-                data['EMAIL'],
-                data['PHONE'],
-                data['CITIES_THEY_OFFER_SERVICES'],
-                data['MARKET_CAPITALIZATION'],
-                data['SIZE_OF_WORK'],
-                data['EXPERTISE'],
-                data['AWARDS_WON'],
-                data['REPUTATION_SCRORE'],
+                data["COMPANY_NAME"],
+                data["OFFICE_LOCATION"],
+                data["WEBSITE"],
+                data["EMAIL"],
+                data["PHONE"],
+                data["CITIES_THEY_OFFER_SERVICES"],
+                data["MARKET_CAPITALIZATION"],
+                data["SIZE_OF_WORK"],
+                data["EXPERTISE"],
+                data["AWARDS_WON"],
+                data["REPUTATION_SCRORE"],
             ]
             dataframe1.to_excel(self.file_name, index=False)
         except IOError:
@@ -163,8 +160,7 @@ class ConsultingScrapeperBot(BaseBot):
     def load_page_correctly(self):
         while True:
             try:
-                self.clicked += 1
-                show_more_button_css = "button[id = 'appx-load-more-button-id']"
+                show_more_button_css = "#appx-load-more-button-id"
                 self.sleep_until_presense_of_element(show_more_button_css)
                 show_more_button = self.driver.find_element(
                     By.CSS_SELECTOR, show_more_button_css)
@@ -172,16 +168,22 @@ class ConsultingScrapeperBot(BaseBot):
             except Exception as ex:
                 break
 
+    def change_tab(self, tab_number):
+        experties_css = "#tab-default-" + str(tab_number) + "__item"
+        self.sleep_until_presense_of_element(experties_css)
+        experties = self.driver.find_element(
+            By.CSS_SELECTOR, experties_css)
+        self.driver.execute_script("arguments[0].click();", experties)
+
     def start_process(self) -> None:
-        self.load_page_correctly()
-        all_companies_div_css = "ul[class='appx-tiles-grid-ul'] li a"
+        all_companies_div_css = ".appx-tiles-grid-ul li a"
         self.sleep_until_presense_of_element(all_companies_div_css)
         all_companies_div = self.driver.find_elements(
             By.CSS_SELECTOR, all_companies_div_css)
-
-        for company_div in all_companies_div:
-            self.driver.execute_script("arguments[0].click();", company_div)
-            # extract all data on overview tab
+        all_company_links = [company_link.get_attribute(
+            "href") for company_link in all_companies_div]
+        for company_link in all_company_links[:2]:
+            self.driver.get(company_link)
             company_name = self.get_company_name()
             communication_channel = self.get_communication_channel()
             office_location = communication_channel['heaqd_quarter']
@@ -189,49 +191,28 @@ class ConsultingScrapeperBot(BaseBot):
             email = communication_channel['email']
             phone = communication_channel['phone']
             cities_they_offer_services = self.get_cities()
-
-        # we still need to figure it out
-        # market_capitalization = self.get_market_capitalization()
-        # size_of_work = self.get_size_of_work()  # we still need to figure it out
-
-        # # extract all data on experties tab
-        # experties_css = "#tab-default-3__item"
-        # self.sleep_until_presense_of_element(experties_css)
-        # experties = self.driver.find_element(
-        #     By.CSS_SELECTOR, experties_css)
-        # self.driver.execute_script("arguments[0].click();", experties)
-        # print("yes........... after experties.........")
-        # time.sleep(3)
-        # expertise = self.get_expertise()
-        # awards_won = self.get_awards_won()
-
-        # # extract all data on reviews tab
-        # reviews_css = "a[id='tab-default-2__item']"
-        # self.sleep_until_presense_of_element(reviews_css)
-        # reviews = self.driver.find_element(
-        #     By.CSS_SELECTOR, reviews_css)
-
-        # self.driver.execute_script("arguments[0].click();", reviews)
-        # print("YES......ON......REVIEW.....PAGE")
-        # time.sleep(10)
-        # reputation_score = self.get_reputation_score()
-        # time.sleep(2)
-
-        # data = {
-        #     "COMPANY_NAME": company_name,
-        #     "OFFICE_LOCATION": office_location,
-        #     "WEBSITE": webiste,
-        #     "EMAIL": email,
-        #     "PHONE": phone,
-        #     "CITIES_THEY_OFFER_SERVICES": " , ".join(cities_they_offer_services),
-        #     "MARKET_CAPITALIZATION": market_capitalization,
-        #     "SIZE_OF_WORK": size_of_work,
-        #     "EXPERTISE": " , ".join(expertise),
-        #     "AWARDS_WON": " , ".join(awards_won),
-        #     "REPUTATION_SCRORE": reputation_score
-        # }
-        # self.save_data_into_excel(data)
-        # break
+            market_capitalization = self.get_market_capitalization()
+            size_of_work = self.get_size_of_work()
+            self.change_tab(3)
+            expertise = self.get_expertise()
+            awards_won = self.get_awards_won()
+            self.change_tab(2)
+            time.sleep(3)
+            reputation_score = self.get_reputation_score()
+            data = {
+                "COMPANY_NAME": company_name,
+                "OFFICE_LOCATION": office_location,
+                "WEBSITE": webiste,
+                "EMAIL": email,
+                "PHONE": phone,
+                "CITIES_THEY_OFFER_SERVICES": " , ".join(cities_they_offer_services),
+                "MARKET_CAPITALIZATION": market_capitalization,
+                "SIZE_OF_WORK": size_of_work,
+                "EXPERTISE": " , ".join(expertise),
+                "AWARDS_WON": " , ".join(awards_won),
+                "REPUTATION_SCRORE": reputation_score
+            }
+            self.save_data_into_excel(data)
 
     def main_function(self) -> None:
         try:
